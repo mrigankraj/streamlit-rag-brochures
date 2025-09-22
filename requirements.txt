@@ -3,9 +3,9 @@ pandas
 requests
 tqdm
 langchain
+langchain-community
 openai
 chromadb
-unstructured
 pypdf
 python-dotenv
 Pillow
