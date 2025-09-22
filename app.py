@@ -21,6 +21,8 @@ uploaded_files = st.sidebar.file_uploader(
     "Upload PDF brochures", type=["pdf"], accept_multiple_files=True
 )
 
+retriever = None  # initialize
+
 # Process uploaded documents
 if uploaded_files:
     from langchain_community.document_loaders import PyPDFLoader
@@ -37,48 +39,51 @@ if uploaded_files:
         create_or_get_faiss(docs)
     st.sidebar.success("📚 Documents indexed in FAISS!")
 
-# Load retriever
-retriever = get_retriever(top_k=5)
+    # Only load retriever *after* docs are indexed
+    retriever = get_retriever(top_k=5)
 
-# Build QA chain
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+# If retriever is ready, enable chat
+if retriever:
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-prompt_template = """Use the following context to answer the question at the end. 
-If you don’t know the answer, just say you don’t know — don’t make anything up.
+    prompt_template = """Use the following context to answer the question at the end. 
+    If you don’t know the answer, just say you don’t know — don’t make anything up.
 
-Context:
-{context}
+    Context:
+    {context}
 
-Question: {question}
+    Question: {question}
 
-Answer:"""
+    Answer:"""
 
-PROMPT = PromptTemplate(
-    template=prompt_template, input_variables=["context", "question"]
-)
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
 
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=retriever,
-    chain_type="stuff",
-    chain_type_kwargs={"prompt": PROMPT},
-    return_source_documents=True,
-)
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm,
+        retriever=retriever,
+        chain_type="stuff",
+        chain_type_kwargs={"prompt": PROMPT},
+        return_source_documents=True,
+    )
 
-# Chat interface
-st.header("💬 Ask a Question")
-user_query = st.text_input("Type your question about the brochures...")
+    # Chat interface
+    st.header("💬 Ask a Question")
+    user_query = st.text_input("Type your question about the brochures...")
 
-if user_query:
-    with st.spinner("🤖 Thinking..."):
-        result = qa_chain.invoke({"query": user_query})
+    if user_query:
+        with st.spinner("🤖 Thinking..."):
+            result = qa_chain.invoke({"query": user_query})
 
-        st.subheader("Answer")
-        st.write(result["result"])
+            st.subheader("Answer")
+            st.write(result["result"])
 
-        # Show sources
-        if "source_documents" in result:
-            st.subheader("Sources")
-            for i, doc in enumerate(result["source_documents"], start=1):
-                st.markdown(f"**Source {i}:** {doc.metadata.get('source', 'Unknown')}")
-                st.caption(doc.page_content[:300] + "...")
+            # Show sources
+            if "source_documents" in result:
+                st.subheader("Sources")
+                for i, doc in enumerate(result["source_documents"], start=1):
+                    st.markdown(f"**Source {i}:** {doc.metadata.get('source', 'Unknown')}")
+                    st.caption(doc.page_content[:300] + "...")
+else:
+    st.info("📂 Please upload brochures first to start asking questions.")
