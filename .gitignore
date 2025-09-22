@@ -2,6 +2,13 @@
 __pycache__/
 *.py[codz]
 *$py.class
+*.pyc
+.env
+downloads/
+uploads/
+chroma_db/
+download_report.csv
+
 
 # C extensions
 *.so
