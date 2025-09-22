@@ -1,4 +1,5 @@
 import os
+import tempfile
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -29,7 +30,13 @@ if uploaded_files:
 
     docs = []
     for uploaded_file in uploaded_files:
-        loader = PyPDFLoader(uploaded_file)
+        # Save uploaded file to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+            tmp_file.write(uploaded_file.read())
+            tmp_file_path = tmp_file.name
+
+        # Load with PyPDFLoader
+        loader = PyPDFLoader(tmp_file_path)
         docs.extend(loader.load())
 
     st.sidebar.success(f"✅ Loaded {len(docs)} pages from {len(uploaded_files)} files")
