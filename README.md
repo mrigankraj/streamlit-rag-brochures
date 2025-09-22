@@ -1,18 +1,15 @@
-# streamlit-rag-brochures
+# Streamlit RAG — Local Embeddings (sentence-transformers) + FAISS
 
-# 📄 Brochure RAG — Streamlit App
+This app:
+- Ingests PDF brochures (upload or Excel links).
+- Extracts text and chunks it.
+- Creates local embeddings using sentence-transformers.
+- Builds a FAISS index (persisted).
+- Allows natural-language queries and uses OpenAI (optional) to generate final answers.
 
-This app lets you:
-- Upload PDFs **or** provide an Excel file with brochure links  
-- Automatically download and convert to PDFs if needed  
-- Chunk + embed with OpenAI  
-- Store in Chroma vector DB  
-- Query with RAG pipeline  
-
-## 🚀 Run Locally
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env  # add your keys
-streamlit run app.py
+## Run locally
+1. python -m venv .venv
+2. source .venv/bin/activate
+3. pip install -r requirements.txt
+4. copy .env.example -> .env and add OPENAI_API_KEY (if using generation)
+5. streamlit run app.py
