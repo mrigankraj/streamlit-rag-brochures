@@ -1,26 +1,20 @@
 import os
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import FAISS
 
-CHROMA_DIR = os.environ.get("CHROMA_DB_DIR", "./chroma_db")
+FAISS_DIR = os.environ.get("FAISS_DB_DIR", "./faiss_db")
 
-def create_or_get_chroma(docs, persist=True):
-    emb = OpenAIEmbeddings(model="text-embedding-3-small")  # ✅ specify model
-    db = Chroma.from_documents(
-        documents=docs,
-        embedding=emb,
-        persist_directory=CHROMA_DIR,
-    )
-    if persist:
-        db.persist()
+def create_or_get_faiss(docs):
+    """Create FAISS index from docs and save locally"""
+    emb = OpenAIEmbeddings(model="text-embedding-3-small")
+    db = FAISS.from_documents(docs, emb)
+    db.save_local(FAISS_DIR)
     return db
 
 def get_retriever(top_k=4):
-    emb = OpenAIEmbeddings(model="text-embedding-3-small")  # ✅ specify model
-    db = Chroma(
-        persist_directory=CHROMA_DIR,
-        embedding_function=emb,
-    )
+    """Load FAISS index from disk and return retriever"""
+    emb = OpenAIEmbeddings(model="text-embedding-3-small")
+    db = FAISS.load_local(FAISS_DIR, emb, allow_dangerous_deserialization=True)
     return db.as_retriever(
         search_type="mmr",
         search_kwargs={"k": top_k},
