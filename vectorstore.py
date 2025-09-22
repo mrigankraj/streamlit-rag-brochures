@@ -1,7 +1,8 @@
 # vectorstore.py
 import os
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+
 
 CHROMA_DIR = os.environ.get("CHROMA_DB_DIR", "./chroma_db")
 
