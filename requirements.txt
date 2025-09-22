@@ -1,0 +1,12 @@
+streamlit==1.30.0
+pandas
+requests
+tqdm
+langchain
+openai
+chromadb
+unstructured
+pypdf
+python-dotenv
+Pillow
+pdf2image
